@@ -482,6 +482,9 @@
                     <i class="bi bi-chevron-right"></i>
                   </button>
                 </div>
+                <button id="renameCurrentWeekTopBtn" type="button" class="btn btn-outline-secondary d-none flex-shrink-0" title="Zmień nazwę aktualnego grafiku (Kierownik)">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
                 <button id="deleteCurrentWeekTopBtn" type="button" class="btn btn-outline-danger d-none flex-shrink-0" title="Usuń aktualnie wybrany grafik">
                   <i class="bi bi-trash"></i>
                 </button>
@@ -1142,6 +1145,11 @@
               <input type="date" id="newWeekStartDate" required class="form-control form-control-sm fw-bold">
               <div class="form-text" style="font-size: 0.72rem;">Grafik obejmuje 7 dni (od wybranego dnia do +6 dni).</div>
             </div>
+            <div class="mb-2">
+              <label class="form-label small fw-bold mb-1">Nazwa grafiku *</label>
+              <input type="text" id="newWeekNameInput" required class="form-control form-control-sm fw-bold" placeholder="np. Grafik 23.10 - 29.10.2026">
+              <div class="form-text" style="font-size: 0.72rem;">Kierownik decyduje, jak nazywa się grafik (możesz wpisać dowolną nazwę).</div>
+            </div>
             <div class="form-check mb-2">
               <input class="form-check-input" type="checkbox" id="copyShiftsToNewWeek">
               <label class="form-check-label small fw-semibold" for="copyShiftsToNewWeek">
@@ -1494,6 +1502,8 @@
             }
           });
           appState.deletedWeeks = Array.isArray(parsed.deletedWeeks) ? parsed.deletedWeeks : [];
+          const activeIds = new Set(appState.weeks.map(w => w.id));
+          appState.deletedWeeks = appState.deletedWeeks.filter(dw => !activeIds.has(dw.id));
           appState.currentWeekId = parsed.currentWeekId || 'week-2026-10-16';
           appState.adminAccount = parsed.adminAccount || { login: 'Admin', password: 'qwerty' };
           if (Array.isArray(parsed.managers) && parsed.managers.length > 0) {
@@ -1899,8 +1909,9 @@
           });
 
           if (activeWeeks.length > 0) {
+            const activeIds = new Set(activeWeeks.map(w => w.id));
             appState.weeks = activeWeeks;
-            appState.deletedWeeks = deletedWeeks;
+            appState.deletedWeeks = deletedWeeks.filter(dw => !activeIds.has(dw.id));
             hasNewData = true;
           }
         }
@@ -1954,9 +1965,14 @@
       if (!supabaseClient || !cloudConfig.cinemaId) return;
       const cinemaId = cloudConfig.cinemaId;
 
-      const allWeeks = [...appState.weeks, ...appState.deletedWeeks];
+      // 1. Zapisz tygodnie (zabezpieczenie przed duplikatami w koszu)
+      const activeIds = new Set(appState.weeks.map(w => w.id));
+      const cleanDeletedWeeks = (appState.deletedWeeks || []).filter(dw => !activeIds.has(dw.id));
+      appState.deletedWeeks = cleanDeletedWeeks;
+
+      const allWeeks = [...appState.weeks, ...cleanDeletedWeeks];
       for (const w of allWeeks) {
-        const isDel = appState.deletedWeeks.some(dw => dw.id === w.id);
+        const isDel = cleanDeletedWeeks.some(dw => dw.id === w.id);
         const { error: wErr } = await supabaseClient.from('schedule_weeks').upsert({
           id: w.id,
           cinema_id: cinemaId,
@@ -2725,6 +2741,7 @@
         selector.appendChild(opt);
       });
 
+      const renameTopBtn = document.getElementById('renameCurrentWeekTopBtn');
       const deleteTopBtn = document.getElementById('deleteCurrentWeekTopBtn');
       const undoTopBtn = document.getElementById('undoDeleteWeekTopBtn');
       const deleteBurgerBtn = document.getElementById('deleteCurrentWeekBurgerBtn');
@@ -2733,6 +2750,7 @@
       const hasDeletedWeeks = Array.isArray(appState.deletedWeeks) && appState.deletedWeeks.length > 0;
 
       if (isManager) {
+        if (renameTopBtn) renameTopBtn.classList.remove('d-none');
         if (deleteTopBtn) {
           deleteTopBtn.classList.remove('d-none');
           deleteTopBtn.disabled = appState.weeks.length <= 1;
@@ -2753,6 +2771,7 @@
           if (undoBurgerWrap) undoBurgerWrap.classList.add('d-none');
         }
       } else {
+        if (renameTopBtn) renameTopBtn.classList.add('d-none');
         if (deleteTopBtn) deleteTopBtn.classList.add('d-none');
         if (undoTopBtn) undoTopBtn.classList.add('d-none');
         if (undoBurgerWrap) undoBurgerWrap.classList.add('d-none');
@@ -4756,6 +4775,7 @@
         if (idx === -1) return;
 
         const [restored] = appState.deletedWeeks.splice(idx, 1);
+        restored.deletedAt = null;
         delete restored.deletedAt;
 
         // Jeśli tydzień o tym ID już istnieje, zastąp go przywracanym
@@ -4790,11 +4810,15 @@
               <span class="text-secondary ms-1" style="font-size: 0.7rem;">(${w.shifts.length} zmian)</span>
             </div>
             <div class="d-flex align-items-center gap-1 flex-shrink-0">
+              <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2 rename-week-modal-btn" title="Zmień nazwę tego grafiku">
+                <i class="bi bi-pencil-square"></i>
+              </button>
               <button type="button" class="btn btn-outline-danger btn-sm py-0 px-2 delete-week-modal-btn" title="Usuń ten grafik" ${appState.weeks.length <= 1 ? 'disabled' : ''}>
                 <i class="bi bi-trash"></i>
               </button>
             </div>
           `;
+          item.querySelector('.rename-week-modal-btn').addEventListener('click', () => renameWeek(w.id));
           item.querySelector('.delete-week-modal-btn').addEventListener('click', () => deleteWeekById(w.id));
           weeksListEl.appendChild(item);
         });
@@ -4842,7 +4866,46 @@
         restoreDeletedWeek(null);
       });
 
+      function renameWeek(weekId) {
+        if (!isManagerRole()) return;
+        const week = appState.weeks.find(w => w.id === weekId);
+        if (!week) return;
+        const newName = window.prompt(`Wpisz nową nazwę dla grafiku:`, week.name);
+        if (newName === null) return;
+        const cleanName = newName.trim();
+        if (!cleanName) {
+          showToast('Nazwa grafiku nie może być pusta.', false);
+          return;
+        }
+        week.name = cleanName;
+        saveState(true, getWeekSyncScope(week));
+        renderAll();
+        renderNewWeekModalLists();
+        showToast(`Zmieniono nazwę na: "${cleanName}"`);
+      }
+
+      const renameTopBtnEl = document.getElementById('renameCurrentWeekTopBtn');
+      if (renameTopBtnEl) {
+        renameTopBtnEl.addEventListener('click', () => {
+          renameWeek(appState.currentWeekId);
+        });
+      }
+
       // --- Modal Nowego Tygodnia ---
+      function updateNewWeekNameSuggestion() {
+        const startStr = document.getElementById('newWeekStartDate').value;
+        if (!startStr) return;
+        const [y, m, d] = startStr.split('-').map(Number);
+        const startObj = new Date(y, m - 1, d);
+        const endObj = new Date(y, m - 1, d + 6);
+        const labelStart = `${String(startObj.getDate()).padStart(2, '0')}.${String(startObj.getMonth() + 1).padStart(2, '0')}`;
+        const labelEnd = `${String(endObj.getDate()).padStart(2, '0')}.${String(endObj.getMonth() + 1).padStart(2, '0')}.${endObj.getFullYear()}`;
+        const nameInput = document.getElementById('newWeekNameInput');
+        if (nameInput && !nameInput.dataset.userEdited) {
+          nameInput.value = `Grafik ${labelStart} - ${labelEnd}`;
+        }
+      }
+
       function openNewWeekModal() {
         closeBurgerMenu();
         const lastWeek = appState.weeks[appState.weeks.length - 1];
@@ -4852,9 +4915,22 @@
           const iso = `${nextStart.getFullYear()}-${String(nextStart.getMonth() + 1).padStart(2, '0')}-${String(nextStart.getDate()).padStart(2, '0')}`;
           document.getElementById('newWeekStartDate').value = iso;
         }
+        const nameInput = document.getElementById('newWeekNameInput');
+        if (nameInput) {
+          delete nameInput.dataset.userEdited;
+        }
+        updateNewWeekNameSuggestion();
         document.getElementById('copyShiftsToNewWeek').checked = false;
         renderNewWeekModalLists();
         bsNewWeekModal.show();
+      }
+
+      document.getElementById('newWeekStartDate').addEventListener('change', updateNewWeekNameSuggestion);
+      const newWeekNameInputEl = document.getElementById('newWeekNameInput');
+      if (newWeekNameInputEl) {
+        newWeekNameInputEl.addEventListener('input', (e) => {
+          e.target.dataset.userEdited = 'true';
+        });
       }
 
       document.getElementById('burgerAddNewWeekBtn').addEventListener('click', openNewWeekModal);
@@ -4863,6 +4939,7 @@
         e.preventDefault();
         const startStr = document.getElementById('newWeekStartDate').value;
         if (!startStr) return;
+        const customName = (document.getElementById('newWeekNameInput').value || '').trim();
 
         const [y, m, d] = startStr.split('-').map(Number);
         const startObj = new Date(y, m - 1, d);
@@ -4871,14 +4948,13 @@
         const endIso = `${endObj.getFullYear()}-${String(endObj.getMonth() + 1).padStart(2, '0')}-${String(endObj.getDate()).padStart(2, '0')}`;
         const labelStart = `${String(startObj.getDate()).padStart(2, '0')}.${String(startObj.getMonth() + 1).padStart(2, '0')}`;
         const labelEnd = `${String(endObj.getDate()).padStart(2, '0')}.${String(endObj.getMonth() + 1).padStart(2, '0')}.${endObj.getFullYear()}`;
+        const finalName = customName || `Grafik ${labelStart} - ${labelEnd}`;
 
         const newId = `week-${startStr}`;
-        if (appState.weeks.some(w => w.id === newId)) {
-          appState.currentWeekId = newId;
-          bsNewWeekModal.hide();
-          renderAll();
-          showToast('Przełączono na istniejący tydzień.');
-          return;
+
+        // 1. Usuń ewentualną usuniętą wersję z kosza, aby nie wywołać konfliktu w chmurze
+        if (Array.isArray(appState.deletedWeeks)) {
+          appState.deletedWeeks = appState.deletedWeeks.filter(dw => dw.id !== newId);
         }
 
         const copyCurrent = document.getElementById('copyShiftsToNewWeek').checked;
@@ -4898,9 +4974,44 @@
           });
         }
 
+        // 2. Sprawdź, czy tydzień o tym ID już istnieje w aktywnych grafikach
+        const existingIdx = appState.weeks.findIndex(w => w.id === newId);
+        if (existingIdx !== -1) {
+          const existingWeek = appState.weeks[existingIdx];
+          
+          let shouldUpdate = true;
+          if (existingWeek.shifts && existingWeek.shifts.length > 0) {
+            shouldUpdate = confirm(
+              `Grafik dla tego terminu już istnieje ("${existingWeek.name}") i zawiera ${existingWeek.shifts.length} zmian.\n\n` +
+              `Kliknij OK, aby nadać mu nazwę "${finalName}" i ${copyCurrent ? 'zastąpić jego zmiany kopią z obecnego tygodnia' : 'zachować jego obecne zmiany'}.\n` +
+              `Kliknij Anuluj, aby po prostu otworzyć ten istniejący grafik.`
+            );
+          }
+
+          if (shouldUpdate) {
+            existingWeek.name = finalName;
+            if (copyCurrent) {
+              existingWeek.shifts = copiedShifts;
+              existingWeek.departments = [...currentWeek.departments];
+              existingWeek.departmentDays = copiedDepartmentDays;
+            }
+            existingWeek.status = 'draft';
+            delete existingWeek.deletedAt;
+          }
+
+          appState.currentWeekId = newId;
+          saveState(true, 'managers');
+          renderNewWeekModalLists();
+          bsNewWeekModal.hide();
+          renderAll();
+          showToast(`Grafik "${existingWeek.name}" jest gotowy!`);
+          return;
+        }
+
+        // 3. Tworzymy nowy tydzień
         const newWeekObj = {
           id: newId,
-          name: `Grafik ${labelStart} - ${labelEnd}`,
+          name: finalName,
           startDate: startStr,
           endDate: endIso,
           status: 'draft',
@@ -4916,7 +5027,7 @@
         renderNewWeekModalLists();
         bsNewWeekModal.hide();
         renderAll();
-        showToast(`Utworzono nowy tydzień roboczy: ${newWeekObj.name}`);
+        showToast(`Utworzono nowy tydzień: "${newWeekObj.name}"`);
       });
 
       document.getElementById('toggleCompareBtn').addEventListener('click', () => {
