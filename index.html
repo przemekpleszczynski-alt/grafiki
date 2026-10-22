@@ -23,7 +23,24 @@
 
   <!-- Supabase JS Client v2 (Chmura PostgreSQL & Realtime WebSockets) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Płynne przywracanie sesji bez migotania ekranu logowania -->
+  <script>
+    try {
+      if (localStorage.getItem('helios_auth_session_v1')) {
+        document.documentElement.classList.add('helios-has-session');
+      }
+    } catch (_) {}
+  </script>
   <style>
+    /* Zapobieganie migotaniu ekranu logowania przy odświeżaniu strony (gdy użytkownik jest zalogowany) */
+    html.helios-has-session #loginScreen {
+      display: none !important;
+    }
+    html.helios-has-session #appContainer {
+      display: flex !important;
+    }
+
     :root {
       --helios-navy: #0b1120;
       --helios-graphite: #161f33;
@@ -2463,8 +2480,43 @@
       if (bsOffcanvas) bsOffcanvas.show();
     }
 
-    function loginSuccess(userObj) {
+    const SESSION_STORAGE_KEY = 'helios_auth_session_v1';
+
+    function saveUserSession(userObj) {
+      try {
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(userObj));
+        document.documentElement.classList.add('helios-has-session');
+      } catch (err) {
+        console.warn('[Session] Błąd zapisu sesji:', err);
+      }
+    }
+
+    function clearUserSession() {
+      try {
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+        document.documentElement.classList.remove('helios-has-session');
+      } catch (err) {
+        console.warn('[Session] Błąd usuwania sesji:', err);
+      }
+    }
+
+    function restoreUserSession() {
+      try {
+        const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+        if (!raw) return null;
+        const user = JSON.parse(raw);
+        if (user && user.name && user.role) {
+          return user;
+        }
+      } catch (err) {
+        console.warn('[Session] Błąd odczytu sesji:', err);
+      }
+      return null;
+    }
+
+    function loginSuccess(userObj, showGreeting = true) {
       appState.loggedInUser = userObj;
+      saveUserSession(userObj);
       appState.previewAsEmployee = false;
       closeBurgerMenu();
 
@@ -2496,11 +2548,14 @@
       document.getElementById('loginPassword').value = '';
 
       renderAll();
-      showToast(`Zalogowano jako: ${userObj.name}`);
+      if (showGreeting) {
+        showToast(`Zalogowano jako: ${userObj.name}`);
+      }
     }
 
     function logoutUser() {
       closeBurgerMenu();
+      clearUserSession();
       appState.loggedInUser = null;
       appState.previewAsEmployee = false;
       appState.comparing = false;
@@ -2509,6 +2564,7 @@
       document.getElementById('loginUsername').value = '';
       document.getElementById('loginPassword').value = '';
       document.getElementById('loginUsername').focus();
+      showToast('Wylogowano z systemu.');
     }
 
     // =========================================================================
@@ -4090,6 +4146,12 @@
           renderPersonalShiftsBanner();
         }
       }, 30000);
+
+      // Przywrócenie sesji użytkownika (zapobiega wylogowywaniu przy odświeżeniu strony)
+      const savedUser = restoreUserSession();
+      if (savedUser) {
+        loginSuccess(savedUser, false);
+      }
 
       // Obsługa Chmury Supabase (Dostęp wyłącznie dla Kierowników i Admina)
       const cloudStatusBtn = document.getElementById('cloudStatusBtn');
