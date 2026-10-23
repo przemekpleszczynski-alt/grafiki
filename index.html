@@ -115,10 +115,22 @@
       filter: brightness(0.96);
     }
 
-    /* Aktywna zmiana w tej godzinie (zielona ramka Bootstrap success) */
+    /* Aktywna zmiana w tej godzinie (pomarańczowa ramka Helios) */
     .shift-active-now {
-      outline: 2px solid var(--bs-success) !important;
-      box-shadow: 0 0 0 0.15rem rgba(25, 135, 84, 0.25);
+      outline: 2px solid #ff6600 !important;
+      box-shadow: 0 0 0 0.18rem rgba(255, 102, 0, 0.35) !important;
+    }
+
+    /* Oznaczenie dzisiejszego dnia (pomarańczowy akcent Helios) */
+    .bg-today-orange {
+      background-color: #ff6600 !important;
+      color: #ffffff !important;
+    }
+    .table-today-orange {
+      background-color: #fff8f0 !important;
+    }
+    .text-today-orange {
+      color: #ff6600 !important;
     }
 
     /* Podświetlenie wybranego pracownika — delikatny zielony */
@@ -433,7 +445,7 @@
             <div class="lh-1">
               <div class="d-flex align-items-center gap-1">
                 <span id="currentUserDisplay" class="fw-bold small">Użytkownik</span>
-                <span id="userRolePill" class="badge text-bg-primary" style="font-size: 0.65rem;">TY</span>
+                <span id="userRolePill" class="badge text-bg-success" style="font-size: 0.65rem;">TY</span>
               </div>
               <div id="currentRoleDisplay" class="text-white-50 d-none d-sm-block mt-1" style="font-size: 0.68rem;">Konto</div>
             </div>
@@ -656,10 +668,10 @@
           <div class="d-flex flex-wrap align-items-center gap-3">
             <span class="fw-bold text-dark"><i class="bi bi-info-circle me-1"></i>Oznaczenia:</span>
             <span class="d-inline-flex align-items-center gap-1">
-              <span class="badge text-bg-primary">TY</span> Twoja zmiana (niebieski wiersz)
+              <span class="badge text-bg-success" style="background-color: #198754 !important;">TY</span> Twoja zmiana (zielony wiersz)
             </span>
             <span class="d-inline-flex align-items-center gap-1">
-              <span class="badge text-bg-success">DZIŚ / TERAZ</span> Dzisiejszy dzień i aktualna godzina (zielony)
+              <span class="badge text-white" style="background-color: #ff6600 !important;">DZIŚ / TERAZ</span> Dzisiejszy dzień i aktualna godzina (pomarańczowy)
             </span>
           </div>
           <div id="employeeControlsText" class="small fw-semibold text-secondary"></div>
@@ -951,16 +963,31 @@
             <div class="mb-2">
               <div class="small fw-bold mb-1">Szybki wybór:</div>
               <div class="d-flex flex-wrap gap-1.5">
-                <button type="button" class="btn btn-outline-danger btn-sm fw-bold preset-dept-btn" data-dept="KK" data-default-days="5">+ KK (Środa)</button>
-                <button type="button" class="btn btn-outline-danger btn-sm fw-bold preset-dept-btn" data-dept="KINO KOBIET" data-default-days="5">+ Kino Kobiet (Śr)</button>
-                <button type="button" class="btn btn-outline-danger btn-sm fw-bold preset-dept-btn" data-dept="MARATON OBSŁUGA" data-default-days="0" data-after="OBSŁUGA">+ Maraton Obsługa (Pt)</button>
-                <button type="button" class="btn btn-outline-danger btn-sm fw-bold preset-dept-btn" data-dept="MARATON BAR" data-default-days="0" data-after="BAR">+ Maraton Bar (Pt)</button>
-                <button type="button" class="btn btn-outline-danger btn-sm fw-bold preset-dept-btn" data-dept="MARATON" data-default-days="0">+ Maraton (Pt)</button>
+                <button type="button" class="btn btn-outline-danger btn-sm fw-bold preset-dept-btn" data-dept="KK" data-default-days="5" data-color="#6f42c1">+ KK (Środa)</button>
+                <button type="button" class="btn btn-outline-danger btn-sm fw-bold preset-dept-btn" data-dept="KINO KOBIET" data-default-days="5" data-color="#6f42c1">+ Kino Kobiet (Śr)</button>
+                <button type="button" class="btn btn-outline-danger btn-sm fw-bold preset-dept-btn" data-dept="MARATON OBSŁUGA" data-default-days="0" data-after="OBSŁUGA" data-color="#dc3545">+ Maraton Obsługa (Pt)</button>
+                <button type="button" class="btn btn-outline-danger btn-sm fw-bold preset-dept-btn" data-dept="MARATON BAR" data-default-days="0" data-after="BAR" data-color="#fd7e14">+ Maraton Bar (Pt)</button>
+                <button type="button" class="btn btn-outline-danger btn-sm fw-bold preset-dept-btn" data-dept="MARATON" data-default-days="0" data-color="#dc3545">+ Maraton (Pt)</button>
               </div>
             </div>
             <div class="mb-2 mt-2">
               <label class="form-label small fw-bold mb-1">Nazwa nowego stanowiska *</label>
               <input type="text" id="newDeptNameInput" required placeholder="np. KK, KINO KOBIET, MARATON..." class="form-control form-control-sm fw-bold text-uppercase">
+            </div>
+            <div class="mb-2.5">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <label class="form-label small fw-bold mb-0">Kolor stanowiska w grafiku:</label>
+                <span id="newDeptColorPreviewBadge" class="badge px-2 py-1" style="background-color: #dc3545; color: #ffffff; font-size: 0.72rem; letter-spacing: 0.02em;">
+                  PODGLĄD
+                </span>
+              </div>
+              <div class="d-flex flex-wrap align-items-center gap-1.5 mb-2" id="deptColorPaletteSwatches">
+                <!-- Generowane przez JS: Swatche kolorów -->
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <input type="color" id="newDeptCustomColorInput" value="#dc3545" class="form-control form-control-color p-0 border border-secondary rounded-2" style="width: 36px; height: 30px; cursor: pointer;" title="Wybierz własny odcień z pełnej palety kolorów">
+                <span class="small text-secondary" style="font-size: 0.72rem;">Wybierz z palety lub kliknij próbnik dla własnego odcienia</span>
+              </div>
             </div>
             <div class="mb-2">
               <div class="d-flex align-items-center justify-content-between mb-1">
@@ -1357,6 +1384,8 @@
         endDate: "2026-10-15",
         status: "published",
         departments: ["OBSŁUGA", "BAR", "KAWIARNIA"],
+        departmentDays: {},
+        departmentColors: { "OBSŁUGA": "#0d6efd", "BAR": "#ffc107", "KAWIARNIA": "#6c757d" },
         shifts: []
       },
       {
@@ -1366,6 +1395,8 @@
         endDate: "2026-10-22",
         status: "published",
         departments: ["OBSŁUGA", "BAR", "KAWIARNIA"],
+        departmentDays: {},
+        departmentColors: { "OBSŁUGA": "#0d6efd", "BAR": "#ffc107", "KAWIARNIA": "#6c757d" },
         shifts: [
           // PIĄTEK 16.10 (dayIndex: 0)
           { id: "s1", dayIndex: 0, dept: "OBSŁUGA", start: "08:15", end: "15:00", employee: "Sta Woj", note: "szkolenie" },
@@ -1905,6 +1936,19 @@
                 note: s.note || ''
               }));
 
+            let deptColors = {};
+            const rawDays = (w.department_days && typeof w.department_days === 'object') ? w.department_days : {};
+            const cleanDays = {};
+            Object.keys(rawDays).forEach(k => {
+              if (k === '__department_colors' || k === '__colors') {
+                deptColors = { ...rawDays[k] };
+              } else if (Array.isArray(rawDays[k])) {
+                cleanDays[k] = rawDays[k];
+              }
+            });
+            const globalColors = getSavedDepartmentColors();
+            deptColors = { ...globalColors, ...deptColors };
+
             const weekObj = {
               id: w.id,
               name: w.name,
@@ -1913,7 +1957,8 @@
               status: w.status || 'published',
               publishedAt: w.published_at || null,
               departments: Array.isArray(w.departments) && w.departments.length ? w.departments : BASE_DEPARTMENTS,
-              departmentDays: (w.department_days && typeof w.department_days === 'object') ? w.department_days : {},
+              departmentDays: cleanDays,
+              departmentColors: deptColors,
               deletedAt: w.deleted_at || null,
               shifts: weekShifts
             };
@@ -1990,6 +2035,10 @@
       const allWeeks = [...appState.weeks, ...cleanDeletedWeeks];
       for (const w of allWeeks) {
         const isDel = cleanDeletedWeeks.some(dw => dw.id === w.id);
+        const deptDaysPayload = { ...(w.departmentDays || {}) };
+        if (w.departmentColors && Object.keys(w.departmentColors).length > 0) {
+          deptDaysPayload.__department_colors = w.departmentColors;
+        }
         const { error: wErr } = await supabaseClient.from('schedule_weeks').upsert({
           id: w.id,
           cinema_id: cinemaId,
@@ -1999,7 +2048,7 @@
           status: w.status || 'published',
           published_at: w.publishedAt || null,
           departments: Array.isArray(w.departments) ? w.departments : BASE_DEPARTMENTS,
-          department_days: w.departmentDays || {},
+          department_days: deptDaysPayload,
           deleted_at: isDel ? (w.deletedAt || Date.now()) : null
         });
 
@@ -2374,12 +2423,71 @@
       return false;
     }
 
+    const DEPT_COLOR_PRESETS = [
+      { name: 'Czerwony', hex: '#dc3545' },
+      { name: 'Fioletowy', hex: '#6f42c1' },
+      { name: 'Różowy', hex: '#d63384' },
+      { name: 'Morski', hex: '#0aa2c0' },
+      { name: 'Indygo', hex: '#4e73df' },
+      { name: 'Ciemnozielony', hex: '#198754' },
+      { name: 'Pomarańczowy', hex: '#fd7e14' },
+      { name: 'Złoty', hex: '#d4a017' },
+      { name: 'Grafitowy', hex: '#495057' },
+      { name: 'Purpurowy', hex: '#59359a' },
+      { name: 'Miętowy', hex: '#20c997' },
+      { name: 'Chabrowy', hex: '#0d6efd' }
+    ];
+
+    function getSavedDepartmentColors() {
+      try {
+        const raw = localStorage.getItem('helios_dept_colors');
+        return raw ? JSON.parse(raw) : {};
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function saveGlobalDepartmentColor(deptName, color) {
+      try {
+        const map = getSavedDepartmentColors();
+        map[deptName.toUpperCase().trim()] = color;
+        localStorage.setItem('helios_dept_colors', JSON.stringify(map));
+      } catch (_) {}
+    }
+
+    function getDepartmentColor(dept, week = null) {
+      if (!dept) return '#6c757d';
+      const upper = dept.toUpperCase().trim();
+      const current = week || (typeof getCurrentWeek === 'function' ? getCurrentWeek() : null);
+      if (current && current.departmentColors && current.departmentColors[upper]) {
+        return current.departmentColors[upper];
+      }
+      const saved = getSavedDepartmentColors();
+      if (saved[upper]) {
+        return saved[upper];
+      }
+      if (upper.includes('OBSŁUGA')) return '#0d6efd';
+      if (upper.includes('BAR')) return '#ffc107';
+      if (upper.includes('KAWIARNIA')) return '#6c757d';
+      if (upper === 'KK' || upper.includes('KOBIET')) return '#6f42c1';
+      if (upper.includes('MARATON')) return '#dc3545';
+      return '#dc3545';
+    }
+
+    function getDepartmentBadgeStyle(dept, week = null) {
+      const color = getDepartmentColor(dept, week);
+      const upper = (dept || '').toUpperCase().trim();
+      const isLight = (color.toLowerCase() === '#ffc107' || upper.includes('BAR'));
+      const textColor = isLight ? '#000000' : '#ffffff';
+      return `background-color: ${color} !important; color: ${textColor} !important;`;
+    }
+
     function getDepartmentBadgeClass(dept) {
       const upper = (dept || '').toUpperCase();
       if (upper.includes('OBSŁUGA')) return 'text-bg-primary';
       if (upper.includes('BAR')) return 'text-bg-warning text-dark';
       if (upper.includes('KAWIARNIA')) return 'text-bg-secondary';
-      return 'text-bg-danger';
+      return 'text-white';
     }
 
     // Zwraca tablicę indeksów dni (0=PT .. 6=CZ), w których dane stanowisko obowiązuje w tym tygodniu
@@ -2932,8 +3040,8 @@
         userRolePill.textContent = 'PODGLĄD';
         userRoleDesc.textContent = 'Widok pracownika';
       } else {
-        userAvatar.className = 'bi bi-person-check-fill text-primary';
-        userRolePill.className = 'badge text-bg-primary';
+        userAvatar.className = 'bi bi-person-check-fill text-success';
+        userRolePill.className = 'badge text-bg-success';
         userRolePill.textContent = 'TY';
         userRoleDesc.textContent = 'Pracownik';
       }
@@ -3071,7 +3179,7 @@
         quickSelect.appendChild(opt2);
       });
 
-      // 10. Nagłówki kolumn w tabeli PC — dzisiejszy dzień na ZIELONO (bg-success)
+      // 10. Nagłówki kolumn w tabeli PC — dzisiejszy dzień na POMARAŃCZOWO (bg-today-orange)
       const nowHHMM = getCurrentTimeHHMM();
       document.querySelectorAll('.day-col-header').forEach(header => {
         const dayIdx = parseInt(header.getAttribute('data-day-index'), 10);
@@ -3082,17 +3190,17 @@
         }
         if (dayIdx === todayDayIdx) {
           header.classList.remove('bg-helios-navy');
-          header.classList.add('bg-success', 'text-white');
+          header.classList.add('bg-today-orange', 'text-white');
           if (badgeEl) {
             badgeEl.classList.remove('d-none');
             badgeEl.innerHTML = `
-              <span class="badge text-bg-light text-success fw-bold">
+              <span class="badge text-bg-light fw-bold" style="color: #ff6600 !important;">
                 <i class="bi bi-broadcast me-1"></i>DZIŚ • <span class="live-col-time font-monospace">${nowHHMM}</span>
               </span>
             `;
           }
         } else {
-          header.classList.remove('bg-success', 'text-white');
+          header.classList.remove('bg-today-orange', 'text-white');
           header.classList.add('bg-helios-navy');
           if (badgeEl) {
             badgeEl.classList.add('d-none');
@@ -3179,11 +3287,14 @@
 
       currentWeek.departments.forEach((dept, deptIdx) => {
         const badgeCls = getDepartmentBadgeClass(dept);
+        const badgeStyle = getDepartmentBadgeStyle(dept, currentWeek);
+        const deptColor = getDepartmentColor(dept, currentWeek);
         const row = document.createElement('tr');
 
         // Kolumna Stanowiska
         const deptCell = document.createElement('td');
         deptCell.className = 'dept-col p-2';
+        deptCell.style.borderLeft = `4px solid ${deptColor}`;
         const isCustomDept = !BASE_DEPARTMENTS.includes(dept);
         const isFirstDept = (deptIdx === 0);
         const isLastDept = (deptIdx === currentWeek.departments.length - 1);
@@ -3196,7 +3307,7 @@
         deptCell.innerHTML = `
           <div class="d-flex flex-column justify-content-between h-100">
             <div>
-              <span class="badge ${badgeCls} mb-1">STANOWISKO</span>
+              <span class="badge mb-1" style="${badgeStyle}">STANOWISKO</span>
               <div class="fw-bold text-white small text-break">${dept}</div>
               ${isCustomDept ? `
                 <div class="mt-1">
@@ -3250,8 +3361,8 @@
             continue;
           }
 
-          // Dzisiejsza kolumna podświetlona na zielono (table-success)
-          dayCell.className = `p-1.5 ${isTodayCol ? 'table-success' : ''}`;
+          // Dzisiejsza kolumna podświetlona na pomarańczowo (table-today-orange)
+          dayCell.className = `p-1.5 ${isTodayCol ? 'table-today-orange' : ''}`;
 
           let cellShifts = currentWeek.shifts
             .filter(s => s.dept === dept && s.dayIndex === dayIdx)
@@ -3283,7 +3394,7 @@
             // Zmiana wybranej / zalogowanej osoby -> DELIKATNY ZIELONY (shift-highlight-green)
             // Szkolenie / notatka -> RÓŻOWY (shift-note-pink)
             // Całka (2 zmiany jednej osoby w tym samym dniu) -> STALOWO-BŁĘKITNY (shift-calka-item)
-            // Trwająca w tej chwili zmiana -> ZIELONA ramka (shift-active-now)
+            // Trwająca w tej chwili zmiana -> POMARAŃCZOWA ramka (shift-active-now)
             let itemCls = 'list-group-item shift-list-item';
             if (isHighlighted) {
               itemCls += ' shift-highlight-green fw-bold';
@@ -3314,7 +3425,7 @@
                     ${isCalka ? `<span class="badge" style="background-color: #4a6fa5; color: #fff; font-size: 0.62rem;" title="Całka — 2 zmiany w tym samym dniu">CAŁKA</span>` : ''}
                   </span>
                   <span class="d-inline-flex gap-1 ms-auto">
-                    ${isActiveNow ? '<span class="badge text-bg-success" style="font-size: 0.62rem;">TERAZ</span>' : ''}
+                    ${isActiveNow ? '<span class="badge text-white" style="background-color: #ff6600 !important; font-size: 0.62rem;">TERAZ</span>' : ''}
                     ${isLoggedUserShift ? '<span class="badge text-bg-success" style="font-size: 0.62rem;">TY</span>' : ''}
                   </span>
                 </div>
@@ -3370,18 +3481,21 @@
     function buildVerticalDayCard(currentWeek, dayIdx, isManager, filter, todayDayIdx) {
       const isToday = (dayIdx === todayDayIdx);
       const card = document.createElement('div');
-      card.className = `card shadow-sm mb-3 ${isToday ? 'border-success border-2' : 'border-0'}`;
+      card.className = `card shadow-sm mb-3 ${isToday ? 'border-2' : 'border-0'}`;
+      if (isToday) {
+        card.style.borderColor = '#ff6600';
+      }
 
-      // Nagłówek dnia (Dzisiejszy dzień na zielono bg-success)
+      // Nagłówek dnia (Dzisiejszy dzień na pomarańczowo bg-today-orange)
       const header = document.createElement('div');
       header.className = `card-header py-2 px-3 d-flex align-items-center justify-content-between ${
-        isToday ? 'bg-success text-white' : 'bg-helios-navy text-white'
+        isToday ? 'bg-today-orange text-white' : 'bg-helios-navy text-white'
       }`;
       header.innerHTML = `
         <div class="d-flex align-items-center gap-2">
           <span class="fw-bold text-uppercase">${DAY_NAMES_FULL[dayIdx]}</span>
           <span class="small opacity-75">(${formatDayDate(currentWeek.startDate, dayIdx)})</span>
-          ${isToday ? `<span class="badge text-bg-light text-success fw-bold">DZIŚ • <span class="live-col-time font-monospace">${getCurrentTimeHHMM()}</span></span>` : ''}
+          ${isToday ? `<span class="badge text-bg-light fw-bold" style="color: #ff6600 !important;">DZIŚ • <span class="live-col-time font-monospace">${getCurrentTimeHHMM()}</span></span>` : ''}
         </div>
         <span class="badge ${isToday ? 'text-bg-dark' : 'text-bg-secondary'}">
           ${currentWeek.shifts.filter(s => s.dayIndex === dayIdx).length} zmian
@@ -3397,6 +3511,8 @@
         if (!isDepartmentActiveOnDay(currentWeek, dept, dayIdx)) return;
 
         const badgeCls = getDepartmentBadgeClass(dept);
+        const badgeStyle = getDepartmentBadgeStyle(dept, currentWeek);
+        const deptColor = getDepartmentColor(dept, currentWeek);
         const isCustomDept = !BASE_DEPARTMENTS.includes(dept);
         const isFirstDept = (deptIdx === 0);
         const isLastDept = (deptIdx === currentWeek.departments.length - 1);
@@ -3413,9 +3529,10 @@
         // Belka stanowiska
         const deptBar = document.createElement('div');
         deptBar.className = 'bg-light border-top border-bottom px-3 py-1.5 d-flex align-items-center justify-content-between gap-2';
+        deptBar.style.borderLeft = `4px solid ${deptColor}`;
         deptBar.innerHTML = `
           <div class="d-flex align-items-center gap-2">
-            <span class="badge ${badgeCls}">${dept}</span>
+            <span class="badge" style="${badgeStyle}">${dept}</span>
             <span class="small text-secondary fw-semibold">(${deptShifts.length})</span>
           </div>
           ${isManager ? `
@@ -3489,7 +3606,7 @@
                 ${isCalka ? `<span class="badge ms-1" style="background-color: #4a6fa5; color: #fff;">CAŁKA</span>` : ''}
               </td>
               <td class="pe-3 text-end text-nowrap">
-                ${isActiveNow ? '<span class="badge text-bg-success me-1">TERAZ</span>' : ''}
+                ${isActiveNow ? '<span class="badge text-white me-1" style="background-color: #ff6600 !important;">TERAZ</span>' : ''}
                 ${isLoggedUserShift ? '<span class="badge text-bg-success me-1">TY</span>' : ''}
                 ${isManager ? '<i class="bi bi-pencil-square text-secondary small"></i>' : ''}
               </td>
@@ -3534,22 +3651,31 @@
         col.className = 'col';
 
         let btnClass = 'btn w-100 py-1.5 px-0 d-flex flex-column align-items-center justify-content-center ';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+
         if (isSelected) {
-          btnClass += isToday ? 'btn-success fw-bold shadow-sm' : 'btn-primary fw-bold shadow-sm';
+          if (isToday) {
+            btnClass += 'text-white fw-bold shadow-sm';
+            btn.style.backgroundColor = '#ff6600';
+            btn.style.borderColor = '#ff6600';
+          } else {
+            btnClass += 'btn-primary fw-bold shadow-sm';
+          }
         } else if (isToday) {
-          btnClass += 'btn-outline-success bg-white fw-bold';
+          btnClass += 'bg-white fw-bold';
+          btn.style.color = '#ff6600';
+          btn.style.borderColor = '#ff6600';
         } else {
           btnClass += 'btn-outline-secondary bg-white';
         }
 
-        const btn = document.createElement('button');
-        btn.type = 'button';
         btn.className = btnClass;
         btn.innerHTML = `
           <span class="small fw-bold lh-1">${DAY_NAMES_SHORT[d]}</span>
           <span class="lh-1 mt-1" style="font-size: 0.68rem;">${formatDayDate(currentWeek.startDate, d)}</span>
           <div class="d-flex align-items-center justify-content-center gap-1 mt-1" style="height: 6px;">
-            ${isToday ? `<span class="rounded-circle d-inline-block ${isSelected ? 'bg-white' : 'bg-success'}" style="width:6px;height:6px;"></span>` : ''}
+            ${isToday ? `<span class="rounded-circle d-inline-block" style="width:6px;height:6px;background-color:${isSelected ? '#ffffff' : '#ff6600'};"></span>` : ''}
             ${hasHighlightedShift ? `<span class="rounded-circle d-inline-block ${isSelected ? 'bg-warning' : 'bg-primary'}" style="width:6px;height:6px;"></span>` : ''}
           </div>
         `;
@@ -3590,7 +3716,8 @@
 
       document.getElementById('shiftDeptInput').value = department;
       document.getElementById('shiftDayInput').value = dayIdx;
-      document.getElementById('modalDeptName').textContent = department;
+      const deptBadgeStyle = getDepartmentBadgeStyle(department, currentWeek);
+      document.getElementById('modalDeptName').innerHTML = `<span class="badge" style="${deptBadgeStyle}">${department}</span>`;
       document.getElementById('modalDayName').textContent = `${DAY_NAMES_FULL[dayIdx]} (${formatDayDate(currentWeek.startDate, dayIdx)})`;
       document.getElementById('employeeQuickSelect').value = '';
 
@@ -3922,7 +4049,15 @@
       if (!currentWeek.departmentDays) currentWeek.departmentDays = {};
       if (prevWeek.departmentDays) {
         Object.keys(prevWeek.departmentDays).forEach(k => {
-          currentWeek.departmentDays[k] = [...prevWeek.departmentDays[k]];
+          if (Array.isArray(prevWeek.departmentDays[k])) {
+            currentWeek.departmentDays[k] = [...prevWeek.departmentDays[k]];
+          }
+        });
+      }
+      if (!currentWeek.departmentColors) currentWeek.departmentColors = {};
+      if (prevWeek.departmentColors) {
+        Object.keys(prevWeek.departmentColors).forEach(k => {
+          currentWeek.departmentColors[k] = prevWeek.departmentColors[k];
         });
       }
       saveState(true, getWeekSyncScope(currentWeek));
@@ -4017,6 +4152,61 @@
       renderDepartmentModalContent();
     };
 
+    let selectedDeptColor = '#dc3545';
+
+    function renderDepartmentPaletteSwatches() {
+      const container = document.getElementById('deptColorPaletteSwatches');
+      const preview = document.getElementById('newDeptColorPreviewBadge');
+      const customColorInput = document.getElementById('newDeptCustomColorInput');
+      if (!container || !preview || !customColorInput) return;
+
+      container.innerHTML = '';
+      DEPT_COLOR_PRESETS.forEach(preset => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn p-0 rounded-circle';
+        btn.title = preset.name;
+        const isSelected = (selectedDeptColor.toLowerCase() === preset.hex.toLowerCase());
+        btn.style.width = '24px';
+        btn.style.height = '24px';
+        btn.style.backgroundColor = preset.hex;
+        btn.style.border = isSelected ? '2px solid #000000' : '1px solid rgba(0,0,0,0.18)';
+        btn.style.boxShadow = isSelected ? '0 0 0 2px rgba(220,53,69,0.35)' : 'none';
+        btn.addEventListener('click', () => {
+          selectedDeptColor = preset.hex;
+          customColorInput.value = preset.hex;
+          updateDeptColorPreview();
+          renderDepartmentPaletteSwatches();
+        });
+        container.appendChild(btn);
+      });
+
+      updateDeptColorPreview();
+    }
+
+    function updateDeptColorPreview() {
+      const preview = document.getElementById('newDeptColorPreviewBadge');
+      const nameInput = document.getElementById('newDeptNameInput');
+      if (!preview) return;
+      const rawName = nameInput ? nameInput.value.trim() : '';
+      preview.textContent = rawName ? rawName.toUpperCase() : 'PODGLĄD';
+      preview.style.backgroundColor = selectedDeptColor;
+      const isLight = (selectedDeptColor.toLowerCase() === '#ffc107');
+      preview.style.color = isLight ? '#000000' : '#ffffff';
+    }
+
+    window.updateExistingDeptColor = function(deptName, newColor) {
+      if (!isManagerRole()) return;
+      const currentWeek = getCurrentWeek();
+      if (!currentWeek.departmentColors) currentWeek.departmentColors = {};
+      currentWeek.departmentColors[deptName] = newColor;
+      saveGlobalDepartmentColor(deptName, newColor);
+      saveState(true, getWeekSyncScope(currentWeek));
+      renderAll();
+      renderDepartmentModalContent();
+      showToast(`Zaktualizowano kolor dla stanowiska ${deptName}`);
+    };
+
     function renderDepartmentModalContent() {
       const currentWeek = getCurrentWeek();
       const posSelect = document.getElementById('newDeptPositionSelect');
@@ -4024,6 +4214,7 @@
       if (!posSelect || !orderList) return;
 
       renderNewDeptDaysPicker();
+      renderDepartmentPaletteSwatches();
 
       const prevSelected = posSelect.value;
       posSelect.innerHTML = '';
@@ -4054,6 +4245,8 @@
       orderList.innerHTML = '';
       currentWeek.departments.forEach((dept, idx) => {
         const badgeCls = getDepartmentBadgeClass(dept);
+        const badgeStyle = getDepartmentBadgeStyle(dept, currentWeek);
+        const deptColor = getDepartmentColor(dept, currentWeek);
         const isFirst = idx === 0;
         const isLast = idx === currentWeek.departments.length - 1;
         const isCustom = !BASE_DEPARTMENTS.includes(dept);
@@ -4066,10 +4259,15 @@
           <div class="d-flex align-items-center justify-content-between gap-2">
             <div class="d-flex align-items-center gap-2">
               <span class="badge text-bg-light border text-secondary">${idx + 1}.</span>
-              <span class="badge ${badgeCls}">${dept}</span>
+              <span class="badge" style="${badgeStyle}">${dept}</span>
               ${!isCustom ? '<span class="text-secondary" style="font-size: 0.7rem;">(Cały tydzień)</span>' : ''}
             </div>
-            <div class="d-flex align-items-center gap-1">
+            <div class="d-flex align-items-center gap-1.5">
+              ${isCustom ? `
+                <div class="d-flex align-items-center" title="Zmień kolor stanowiska ${dept}">
+                  <input type="color" value="${deptColor}" class="form-control form-control-color p-0 border border-secondary rounded" style="width: 26px; height: 24px; cursor: pointer;" onchange="updateExistingDeptColor('${escapedDept}', this.value)">
+                </div>
+              ` : ''}
               <div class="btn-group btn-group-sm" role="group">
                 <button type="button" onclick="moveDepartment('${escapedDept}', -1)" class="btn btn-outline-secondary py-0 px-2" title="Przesuń wyżej" ${isFirst ? 'disabled' : ''}>
                   <i class="bi bi-arrow-up"></i>
@@ -4114,6 +4312,9 @@
       currentWeek.shifts = currentWeek.shifts.filter(s => s.dept !== deptName);
       if (currentWeek.departmentDays) {
         delete currentWeek.departmentDays[deptName];
+      }
+      if (currentWeek.departmentColors) {
+        delete currentWeek.departmentColors[deptName];
       }
       saveState(true, getWeekSyncScope(currentWeek));
       renderAll();
@@ -4614,6 +4815,9 @@
       document.getElementById('addDepartmentBtn').addEventListener('click', () => {
         closeBurgerMenu();
         document.getElementById('newDeptNameInput').value = '';
+        selectedDeptColor = '#dc3545';
+        const customColInput = document.getElementById('newDeptCustomColorInput');
+        if (customColInput) customColInput.value = '#dc3545';
         // Domyślnie zaznacz aktualnie wybrany dzień (w widoku 1 dnia) lub Piątek (0)
         newDeptSelectedDays = appState.viewMode === 'day' ? [appState.selectedMobileDay] : [0];
         renderDepartmentModalContent();
@@ -4634,6 +4838,14 @@
       document.querySelectorAll('.preset-dept-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.getElementById('newDeptNameInput').value = btn.getAttribute('data-dept');
+          const colorAttr = btn.getAttribute('data-color');
+          if (colorAttr) {
+            selectedDeptColor = colorAttr;
+            const customColInput = document.getElementById('newDeptCustomColorInput');
+            if (customColInput) customColInput.value = colorAttr;
+            updateDeptColorPreview();
+            renderDepartmentPaletteSwatches();
+          }
           const defDaysAttr = btn.getAttribute('data-default-days');
           if (defDaysAttr !== null && defDaysAttr !== '') {
             newDeptSelectedDays = defDaysAttr.split(',').map(Number);
@@ -4652,6 +4864,22 @@
         });
       });
 
+      const customColInput = document.getElementById('newDeptCustomColorInput');
+      if (customColInput) {
+        customColInput.addEventListener('input', (e) => {
+          selectedDeptColor = e.target.value;
+          updateDeptColorPreview();
+          renderDepartmentPaletteSwatches();
+        });
+      }
+
+      const deptNameInput = document.getElementById('newDeptNameInput');
+      if (deptNameInput) {
+        deptNameInput.addEventListener('input', () => {
+          updateDeptColorPreview();
+        });
+      }
+
       document.getElementById('departmentForm').addEventListener('submit', (e) => {
         e.preventDefault();
         if (!isManagerRole()) return;
@@ -4665,6 +4893,7 @@
 
         const currentWeek = getCurrentWeek();
         if (!currentWeek.departmentDays) currentWeek.departmentDays = {};
+        if (!currentWeek.departmentColors) currentWeek.departmentColors = {};
 
         if (currentWeek.departments.includes(deptName)) {
           if (BASE_DEPARTMENTS.includes(deptName)) {
@@ -4672,11 +4901,13 @@
             return;
           }
           currentWeek.departmentDays[deptName] = [...newDeptSelectedDays].sort((a, b) => a - b);
+          currentWeek.departmentColors[deptName] = selectedDeptColor;
+          saveGlobalDepartmentColor(deptName, selectedDeptColor);
           saveState(true, getWeekSyncScope(currentWeek));
           renderAll();
           renderDepartmentModalContent();
           bsDeptModal.hide();
-          showToast(`Zaktualizowano dni dla stanowiska ${deptName}: ${currentWeek.departmentDays[deptName].map(d => DAY_NAMES_SHORT[d]).join(', ')}`);
+          showToast(`Zaktualizowano dni i kolor dla stanowiska ${deptName}: ${currentWeek.departmentDays[deptName].map(d => DAY_NAMES_SHORT[d]).join(', ')}`);
           return;
         }
 
@@ -4696,6 +4927,8 @@
         }
 
         currentWeek.departmentDays[deptName] = [...newDeptSelectedDays].sort((a, b) => a - b);
+        currentWeek.departmentColors[deptName] = selectedDeptColor;
+        saveGlobalDepartmentColor(deptName, selectedDeptColor);
         const daysText = currentWeek.departmentDays[deptName].map(d => DAY_NAMES_SHORT[d]).join(', ');
 
         document.getElementById('newDeptNameInput').value = '';
@@ -5030,9 +5263,17 @@
           : [];
 
         const copiedDepartmentDays = {};
+        const copiedDepartmentColors = {};
         if (copyCurrent && currentWeek.departmentDays) {
           Object.keys(currentWeek.departmentDays).forEach(k => {
-            copiedDepartmentDays[k] = [...currentWeek.departmentDays[k]];
+            if (Array.isArray(currentWeek.departmentDays[k])) {
+              copiedDepartmentDays[k] = [...currentWeek.departmentDays[k]];
+            }
+          });
+        }
+        if (copyCurrent && currentWeek.departmentColors) {
+          Object.keys(currentWeek.departmentColors).forEach(k => {
+            copiedDepartmentColors[k] = currentWeek.departmentColors[k];
           });
         }
 
@@ -5056,6 +5297,7 @@
               existingWeek.shifts = copiedShifts;
               existingWeek.departments = [...currentWeek.departments];
               existingWeek.departmentDays = copiedDepartmentDays;
+              existingWeek.departmentColors = copiedDepartmentColors;
             }
             existingWeek.status = 'draft';
             delete existingWeek.deletedAt;
@@ -5079,6 +5321,7 @@
           status: 'draft',
           departments: copyCurrent ? [...currentWeek.departments] : [...BASE_DEPARTMENTS],
           departmentDays: copiedDepartmentDays,
+          departmentColors: copiedDepartmentColors,
           shifts: copiedShifts
         };
 
